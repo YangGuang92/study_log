@@ -1,0 +1,7 @@
+1. 到底该不该用join（通过explain 查看 Extar字段有没有Block Nested-Loop 字样）
+	1)如果使用的 Index Nested-Loop join 算法 也就是说可以用上被驱动表的索引，所以没有区别
+	2)如果使用的是Block Nested-Loop join 算法，尽量不用join
+
+2.如果非要使用join，是不是应该选小表作为驱动表
+	1)如果是Index Nested-Loop join 是需要用小表作为驱动表的
+	2)如果是Block Nested-loop join 如果join-buffer-size足够大 是没有区别的，如果不够大，需要小表作为驱动表

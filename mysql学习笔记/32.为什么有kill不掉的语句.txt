@@ -1,0 +1,15 @@
+1 kill命令 有两个
+	kill query +线程id 表示终止这个线程正在执行的语句
+	kill connection + 线程id 或者 kill + 线程id 表示断开这个线程的连接
+
+2.kill query +线程id 之后，mysql做了两件事
+	把这个线程执行的事务的运行状态 THE::KILL_QUERY
+	给这个线程发送一个信号(作用是，告诉这个线程退出等待，处理THE::KILL_QUERY状态)
+
+3.有时候因为超过并发查询上线，进入阻塞状态，这时候 用kill query 是没用的，因为这个等待还没有进入InnoDB，所以无法处理这个信息，只能通过kill + 线程id
+	这时候 show processlist 可以看到这个线程是killed状态(被 kill query掉的，是看不到的)，这里的显示的原因是因为，虽然客户端已经断开连接，但是这个
+	线程还在等待状态，等到满足进入InnoDB的条件之后，再执行后续的终止逻辑
+
+4.还有一种情况是终止逻辑耗时很长，比如超大事务被kill、大查询回滚、DDL命令执行到最后阶段被kill
+
+5.在客户端 ctrl+C 其实是 Mysql客户端另起了一个线程来执行kill query命令

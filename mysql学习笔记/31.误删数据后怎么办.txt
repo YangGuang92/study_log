@@ -1,0 +1,9 @@
+1.使用delete语句删除行
+	使用flashback工具(需要确保binlog_format = row 和binlog_row_image = FULL)
+	建议把 sql_safe_updates 设置为on 如果 update或者delete中没有where条件，或者where条件没有包含索引会报错
+
+2.误删表或者库
+	就需要用的全量备份了，然后通过mysqlbinlog来恢复数据(去除掉误删的那条语句)
+
+3.恢复的过程可能很慢，但是业务又是比较核心的，就要用到mysql5.6新引入的搭建延迟复制的备库的,要提前搭建，这个库可以根据你设置的延时时间来延时同步主库数据
+	这样在恢复的时候，就只用恢复这个设置时间段内的数据，可以节省很多时间

@@ -1,0 +1,27 @@
+tips:并发查询并不是指并发连接  show processlist 中显示为“当前正在执行”的才是并发查询
+
+1.select 1（使用非常广泛）;
+	但是这个只能查出数据库连接正常，如果超过数据库最大并发查询，select 1是正常的，但是其他的查询还是被锁住了
+
+2.查询判断
+	可以在系统库(mysql库)里建一张health_check表，里面只放一行数据，如果因为并发造成的问题，可以通过查这张表，来判断
+	但是如果磁盘空间满了，通过这个查询也就查不出来了，因为磁盘空间满了，所有的查询时正常的
+
+3.更新判断
+	首先要修改表结构，server_id做主键，这样在主库和备库通过更新就不会产生主键冲突问题,如下
+	mysql> CREATE TABLE `health_check` (
+	  `id` int(11) NOT NULL,
+	  `t_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	  PRIMARY KEY (`id`)
+	) ENGINE=InnoDB;
+
+	/* 检测命令 */
+	insert into mysql.health_check(id, t_modified) values (@@server_id, now()) on duplicate key update t_modified=now();
+	但是，这个方法也有问题，因为更新占用的IO很少，在IO负载很高的时候，有时更新判断也会执行成功，所以并不能真正判断出来问题
+
+4.通过内部统计
+	在mysql5.6及其之后mysql会有一个performance_schema库，里面有一张file_summary_by_event_name表，里面有统计IO的请求时间
+	可以通过如下语句来查询IO请求大于200毫秒的
+	select event_name,MAX_TIMER_WAIT  FROM performance_schema.file_summary_by_event_name where event_name in ('wait/io/file/innodb/innodb_log_file','wait/io/file/sql/binlog') and MAX_TIMER_WAIT>200*1000000000;
+	查询出异常后，要把统计信息清空
+	truncate table performance_schema.file_summary_by_event_name;

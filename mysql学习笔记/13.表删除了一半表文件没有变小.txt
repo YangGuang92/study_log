@@ -1,0 +1,7 @@
+1.innodb_file_per_table参数设置为ON(mysql5.6之后默认为ON)，每张表的数据存在单独的.ibd后缀文件中(否则就存在表共享空间中),在drop table 时，就会删除整个表文件
+
+2.如果一个表因为很多的数据插入修改和删除造成数据空洞，需要重建表(alter table A engine=InnoB),在5.5之前这个操作不能有更新进来，5.6之后可以有(OnLine DDL)
+
+3.Online 因为是在InnoDB内部中创建临时文件，对于server层来说，乜有创建临时表，所以叫inplace,但是这个操作很消耗IO和CPU，而且磁盘空间不够的话，也是不行的
+
+4.如果DDL操作是Online的话，那么一定是inplace, 反过来则不一定

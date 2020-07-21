@@ -1,0 +1,16 @@
+1.事务日志同步的过程:
+	1)在备份库中通过 change master 命令 设置主库的ip,port 用户名 密码 和从那个位置开始请求binlog(包含文件名和偏移量)
+	2)在备份库中执行start slave 命令 ，这时候备份库会启动两个线程 一个是io_thread(用来和主库建立连接),另一个是sql_thread
+	3)主库验证用户名，密码，从备份库传过来的位置读取binlog,发个备份库
+	4)备份库拿到binlog 写入本地文件，即为中转日志(relay log)
+	5)sql_thread读取中转日志，解析命令，执行
+
+2.binlog 有三种类型的格式 STATEMENT ROW MIXED
+	STATEMENT:记录的是真实的sql(但是有可能存在主备份数据库优化器选择的索引不同，所以造成主备份不一致)
+	ROW：显示的是事件(event),通过mysqlbinlog命令可以把事件解析出来，是通过主键来记录的(所以不会造成朱备份不一致)
+	MIXED:对于那些有可能造成主备不一致的语句，用ROW格式，其他的用STATEMENT格式
+
+3.双M结构，怎么保证循环复制问题
+	1)让两个数据库server_id不一致
+	2)一个从库在通过主库的binlog做重放的工程中，生成一个和主库server_id相同的binlog
+	3)每个库在接收到另一个库发过来的binlog时，判断server_id是否跟自己的server_id相同，相同就丢弃这个日志

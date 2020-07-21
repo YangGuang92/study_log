@@ -1,0 +1,20 @@
+在主库上更新或者写入数据，怎么解决从库没有读到数据
+1.强制走主库查询
+	对于那些实时性要求比较高的查询，可以走强制查主库的
+
+2.sleep方案
+	select sleep(1);一秒后查询，但是这个方案看上去就不太靠谱，但是用户体验不好，而且主备延时超过1秒，还是不行的
+
+3.判断主备无延时方案(也不是最精确的)
+	3.1)通过seconds_behind_master可以看到从库和主库之间的延时信息，但是以秒为单位，也不是很准确
+	3.2)在从库上 show slave status 可以比对主从库的binlong信息偏移量是否相同，而且还可以比对GTID集合是否相同(前提:Auto_Position=1)
+
+4.配合 semi-sync
+	这个策略是；事务提交后 主库把binlog发给从库，从库收到binlog后，发给主库一个ack 表示已接收，主库收到ack，给客户端返回事务完成
+	这种情况在一主一备的情况下是完全可以保证主备一致的，但是多个备份库就不行，因为只要有一个备份库返回ack，主库就会返回客户端事务完成
+
+5.等主库位点方案(最好的方法)
+	5.1)主库完成事务，通过 show master status 可以知道主库的binlog 文件和position 
+		然后选择一个从库查 select master_pos_wait(File, Position, 1)；如果>=0表示，从库已经复制完成
+	5.2)在mysql5.7.6之后，每个事务执行完成可以获取这个事务的GTID（通过API接口 mysql_session_track_get_first，前提对应的设置要打开）
+	    然后选择一个从库，去从库执行select wait_for_executed_gtid_set(gtid1, 1)； 返回0 表示可以从从库获取数据

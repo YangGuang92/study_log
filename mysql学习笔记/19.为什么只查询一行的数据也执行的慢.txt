@@ -1,0 +1,9 @@
+1.show processlist 查看用户正在执行的线程
+
+2.数据长时间不返回
+	1)等MDL锁
+	2）等flush
+	3) 等行锁（比如某张表的写锁被某个事务占着）,通过 select * from t sys.innodb_lock_waits where locked_table=`'test'.'t'`\G  查行锁，显示数据中的blocking_pid 就是线程id 需要用    kill 线程id   来处理
+
+3.查询慢
+	如果一个事务中已经开启， 另一个事务把一条数据改了100W次，那么在第一个事务中（当前读的隔离级别）就会查询很慢，因为第一个事务需要通过100W个回滚日志来回滚到第一个事务开启时的数据，所以很慢

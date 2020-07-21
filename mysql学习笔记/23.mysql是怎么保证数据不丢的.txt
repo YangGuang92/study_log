@@ -1,0 +1,6 @@
+1.binlog的写入机制
+	事务提交过程中，先把日志写到binlog cache 事务提交时，再把binlog cache写入binlog中
+	但是，写入操作是指写入文件系统的page cache 并没有持久化到 磁盘，持久化到磁盘是根据sync_binlog 设置的，如果设置成N 那么异常重启是 N条binlog会丢失
+
+2.redo log 跟 binlog的机制差不多
+

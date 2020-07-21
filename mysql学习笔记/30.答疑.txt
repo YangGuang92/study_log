@@ -1,0 +1,4 @@
+1.查看死锁信息
+	show engine innodb status
+
+2.听不懂.........

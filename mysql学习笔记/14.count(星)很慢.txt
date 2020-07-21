@@ -1,0 +1,10 @@
+1.不同搜索引擎count(*)的实现方法不同，
+	MyISAM会把表的行数记录磁盘，用到时直接返回,
+	InnoDB会一行一行取
+
+2.count(主键Id),count(1)，count(字段),count(*)速度对比
+	count(主键id)：遍历整张表，把每一行的id取出来，给到server层，然后server层进行累加
+	count(1):遍历整张表，但不取值，server层对于每一行放一个1进行累加
+	count(字段):遍历整张表,取出每一行的字段，判断是否为null，不是null返回server层，server层累加
+	count(*):遍历整张表，不取值，server层累加
+	所以， 用时:count(*) = count(1)<count(id)<count(字段)

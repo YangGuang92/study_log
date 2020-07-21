@@ -1,0 +1,12 @@
+1.先处理掉那些占着连接但不工作的线程
+	通过 show processlist 查看，这时需要kill掉那些已经处理完成的事务，可以用select * from information_schema.innodb_trx (这是在事务中的线程)
+
+2.减少连接过程的消耗
+	如:关闭权限验证，重启数据库时，用–skip-grant-tables参数重启
+
+3.慢查询性能问题
+	1)索引没有设计好
+	2)sql语句没写好
+	3)数据库选错了索引
+
+4.QPS突增问题

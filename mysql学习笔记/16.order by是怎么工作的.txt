@@ -1,0 +1,11 @@
+1.sort_buffer:
+	通过EXPLAIN 查看，Extra信息中有'Using filesort'说明使用了排序，mysql给每个线程分配了一个内存用来排序 叫sort_buffer
+
+2.全字段排序：
+	把所有字段放入sort_buffer中来排序
+	当然排序也有可能是在内存外部排序的，因为设置的sort_buffer_size不够
+
+3.rowid排序：
+	只把id和排序的字段放入sort_buffer中排序，然后在通过主键去找数据返回(是在单行数据很大的情况下)
+
+4.复合索引会默认排序，所以适当情况下，可以使用复合索引来实现查询和排序的功能，如(where a order by b desc,可以创建a和b的联合索引)，这样就可以提升查询速度

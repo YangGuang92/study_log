@@ -1,0 +1,8 @@
+1.全局锁:
+	应用场景:全库逻辑备份
+	手动语法: Flush tables with read lock
+
+2.表锁：
+	mysql中表锁分为两种 1:表锁 2.元数据锁(meta data lock MDL)
+    手动锁表语法:lock tables xxx read/write, unlock ....释放锁
+    锁表分为读锁和写锁:读锁是预期将对数据表进行读取操作，锁定期间保证表不能被修改。写锁是预期会对数据表更新操作，锁定期间保证表不能被其他线程更新或读取。

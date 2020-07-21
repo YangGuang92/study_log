@@ -1,0 +1,4 @@
+1.全表扫描对server层的影响
+	mysql 是边读边发的
+	Sending to client 是正在给客户端发送数据
+	Sending data 可以理解为正在执行
