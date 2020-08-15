@@ -372,28 +372,24 @@ doc/*.txt #忽略doc目录下的所有txt文件
 
   ```bash
   # 生成一个可供发布的压缩包
-  $ git archive
+  $ git archie
   ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### 7. 特殊场景命令及理解
 
 - `git rabase`: 和merge一样，都是用来合并分支的，但是rebase可以把变成一条直线更加直观，其实现原理是：**你可以使用 `rebase` 命令将提交到某一分支上的所有修改都移至另一分支上，就好像“重新播放”一样。**
 
+  比如：时刻1，从master分支分出来了一个test分支，然后做了一些修改并提交，在时刻1之后，master分支也做了一些修改并提交，这时候如果test分支通过merge合并到master分支，这样就会造成分支拓扑图在时刻1分了一个叉(test分支)，merge的时候这个叉路有拐回到master分支，如果使用在test分支，rebase master分支，就会在master现有提交上面再加test分支的提交，具体的操作如下：
   
+  ```bash
+  #在test分支上
+  git rebase master
+  #这时整个流程就会变成一条直线，不会分叉，且这时候在test分支上比master分支多了test分支的提交
+  #然后切到master分支，再merge test
+  git merge test
+  #最后 push到远程仓库
+  git push
+  ```
+  
+- `git cherry-pick commitID` :把其他分支的某次提交应用到这个分支上，如果想把另一个分支上的所有提交全应用到这个分支上，就需要从最最开始的commit 到最近的commit依次应用，顺序不能错
 
