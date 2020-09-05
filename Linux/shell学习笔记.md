@@ -24,7 +24,7 @@ linux的shell解释器有很多：
 ##### 1.2 编写第一个shell脚本
 
 ```bash
-#告诉系统使用哪个解释器解释这个脚本
+#告诉系统使用哪个解释器解释这个脚本,也可以使用php，python，就是告诉内核使用什么解释器解释下面的命令
 #!/bin/bash
 # echo 是用于窗口输出
 echo 'hello world!'
@@ -59,7 +59,7 @@ shell分为三种变量:
 - 变量名最好加上`{}`花括号，使解释器区分变量和其他值，也可以提高代码的可读性，
 
   ```bash
-  #不加引号也是可以的，但如果需要在引号中解析变量，就需要用到双引号，同php一样
+  #不加花括号也是可以的，但如果需要在引号中解析变量，就需要用到花括号，同php一样
   name=java
   echo ${name}script
   ```
@@ -70,7 +70,8 @@ shell分为三种变量:
   name=yang
   #注意！readonly的时候不能添加$
   readonly name
-  #当修改变量的时候，运行时会提醒该变量只读
+  #当修改变量的时候，运行时会提醒该变量只读，不能被手动删除
+  #readonly的变量怎么删除呢，其实readonly的变量只存在于当前shell开辟的内存中，关闭当前shell，内存就会被自动释放，就像新打开一个命令行，就是一个新的shell，原来的命令行中的只读变量并不能在这个命令行中输出，关闭原来的命令行，内存就会释放
   ```
 
 - **删除变量**，使用`unset`，
@@ -98,14 +99,14 @@ shell分为三种变量:
 
   ```bash
   string='baidu'
-  echo ${string:1:4} #截取字符串从第一位到第四位，同php的substr
+  echo ${string:1:4} #截取字符串从第一位到第四位（从0位开始），同php的substr
   ```
 
-- 查找子字符串，
+- 查找子字符串，查找字符 **i** 或 **o** 的位置(哪个字母先出现就计算哪个)
 
   ```bash
   string="runoob is a great site"
-  #注意！这里是反引号，而不是单引号
+  #注意！这里是反引号，而不是单引号 , expr是linux的手工命令行计数工具
   echo `expr index "$string" io`  # 输出 4
   ```
 
@@ -157,12 +158,13 @@ echo "第三个参数为：$3";
 
 另外，还有几个常用的特殊字符来处理参数
 
-| 参数 | 说明                                 |
-| ---- | ------------------------------------ |
-| $#   | 获取所有传入参数个数                 |
-| $*   | 以一个字符串的格式显示所有传入的参数 |
-| $$   | 获取脚本运行的当前进程ID             |
-| $!   | 后台运行的最后一个进程ID             |
+| 参数 | 说明                                                         |
+| ---- | ------------------------------------------------------------ |
+| $#   | 获取所有传入参数个数                                         |
+| $*   | 以一个字符串的格式显示所有传入的参数，                       |
+| $$   | 获取脚本运行的当前进程ID                                     |
+| $!   | 后台运行的最后一个进程ID                                     |
+| $@   | 也是显示所有传入的参数，但是和$*不同的是，有多少个参数显示多少个 |
 
 ### 4. shell基本运算符
 
@@ -185,22 +187,379 @@ value2=2
 echo `expr ${value1} + ${value2}` #输出3
 ```
 
+> 基本的算数运算也可以使用`[]`中括号，如：
+>
+> a=1
+>
+> b=2
+>
+> echo $[a+b]
+
 常用的算数运算符
 
-| 运算符 | 说明                                          | 举例                                       |
-| :----- | :-------------------------------------------- | :----------------------------------------- |
-| +      | 加法                                          | `expr $a + $b` 结果为 30。                 |
-| -      | 减法                                          | `expr $a - $b` 结果为 -10。                |
-| *      | 乘法                                          | `expr $a \* $b` 结果为  200。*需要被转义   |
-| /      | 除法                                          | `expr $b / $a` 结果为 2。                  |
-| %      | 取余                                          | `expr $b % $a` 结果为 0。                  |
-| =      | 赋值                                          | a=$b 将把变量 b 的值赋给 a。不需要用到expr |
-| ==     | 相等。用于比较两个数字，相同则返回 true。     | [ $a == $b ] 返回 false。不需要用到expr    |
-| !=     | 不相等。用于比较两个数字，不相同则返回 true。 | [ $a != $b ] 返回 true。不需要用到expr     |
+| 运算符 | 说明                                                    | 举例                                       |
+| :----- | :------------------------------------------------------ | :----------------------------------------- |
+| +      | 加法                                                    | `expr $a + $b` 结果为 30。                 |
+| -      | 减法                                                    | `expr $a - $b` 结果为 -10。                |
+| *      | 乘法（*前必须加反斜杠转义）                             | `expr $a \* $b` 结果为  200。*需要被转义   |
+| /      | 除法                                                    | `expr $b / $a` 结果为 2。                  |
+| %      | 取余                                                    | `expr $b % $a` 结果为 0。                  |
+| =      | 赋值                                                    | a=$b 将把变量 b 的值赋给 a。不需要用到expr |
+| ==     | 相等。用于比较两个数字，相同则返回 true。（注意空格！） | [ $a == $b ] 返回 false。不需要用到expr    |
+| !=     | 不相等。用于比较两个数字，不相同则返回 true。           | [ $a != $b ] 返回 true。不需要用到expr     |
 
-
+> 注意：在MAC上，可以用$(($a * $b))代替 反引号加expr的写法，而且*也不用加反斜杠
 
 ##### 4.2 关系运算符
 
+关系运算符只支持数字或者字符串格式的数字，不支持字符串
 
+| 运算符              | 说明                                                  | 举例                       |
+| :------------------ | :---------------------------------------------------- | :------------------------- |
+| -eq（equal）        | 检测两个数是否相等，相等返回 true。                   | [ $a -eq $b ] 返回 false。 |
+| -ne（not equal）    | 检测两个数是否不相等，不相等返回 true。               | [ $a -ne $b ] 返回 true。  |
+| -gt (greater than)  | 检测左边的数是否大于右边的，如果是，则返回 true。     | [ $a -gt $b ] 返回 false。 |
+| -lt（less than）    | 检测左边的数是否小于右边的，如果是，则返回 true。     | [ $a -lt $b ] 返回 true。  |
+| -ge (greater equal) | 检测左边的数是否大于等于右边的，如果是，则返回 true。 | [ $a -ge $b ] 返回 false。 |
+| -le (less equal)    | 检测左边的数是否小于等于右边的，如果是，则返回 true。 | [ $a -le $b ] 返回 true。  |
+
+##### 4.3 布尔运算符
+
+| 运算符 | 说明                                                | 举例                                     |
+| :----- | :-------------------------------------------------- | :--------------------------------------- |
+| !      | 非运算，表达式为 true 则返回 false，否则返回 true。 | [ ! false ] 返回 true。                  |
+| -o     | 或运算，有一个表达式为 true 则返回 true。           | [ $a -lt 20 -o $b -gt 100 ] 返回 true。  |
+| -a     | 与运算，两个表达式都为 true 才返回 true。           | [ $a -lt 20 -a $b -gt 100 ] 返回 false。 |
+
+```sh
+a=10
+b=20
+# ！！注意！！ 布尔运算符需要使用单个的中括号[] 
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a == $b: a 等于 b"
+fi
+if [ $a -lt 100 -a $b -gt 15 ]
+then
+   echo "$a 小于 100 且 $b 大于 15 : 返回 true"
+else
+   echo "$a 小于 100 且 $b 大于 15 : 返回 false"
+fi
+if [ $a -lt 100 -o $b -gt 100 ]
+then
+   echo "$a 小于 100 或 $b 大于 100 : 返回 true"
+else
+   echo "$a 小于 100 或 $b 大于 100 : 返回 false"
+fi
+if [ $a -lt 5 -o $b -gt 100 ]
+then
+   echo "$a 小于 5 或 $b 大于 100 : 返回 true"
+else
+   echo "$a 小于 5 或 $b 大于 100 : 返回 false"
+fi
+```
+
+##### 4.4 逻辑运算符
+
+| 运算符 | 说明                     | 举例                                       |
+| :----- | :----------------------- | :----------------------------------------- |
+| &&     | 逻辑的 AND(同php中的&&)  | [[ $a -lt 100 && $b -gt 100 ]] 返回 false  |
+| \|\|   | 逻辑的 OR(同php中的\|\|) | [[ $a -lt 100 \|\| $b -gt 100 ]] 返回 true |
+
+> 布尔运算符和逻辑运算符的区别在于：
+>
+> 逻辑运算符有一个短路的功能，如果在逻辑与中，如果一个是false，后面的就不执行，在逻辑或中，第一个是true，第二个就不执行
+>
+> 布尔运算符没有这个功能
+>
+> 而且逻辑运算符需要用的双中括号[[]]，也可以[xxx]&&[xxx]
+>
+> 布尔运算符用到单中括号[]
+
+```sh
+a=10
+b=20
+
+if [[ $a -lt 100 && $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+
+if [[ $a -lt 100 || $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+```
+
+##### 4.5 字符串运算符
+
+| 运算符 | 说明                                         | 举例                     |
+| :----- | :------------------------------------------- | :----------------------- |
+| =      | 检测两个字符串是否相等，相等返回 true。      | [ $a = $b ] 返回 false。 |
+| !=     | 检测两个字符串是否相等，不相等返回 true。    | [ $a != $b ] 返回 true。 |
+| -z     | 检测字符串长度是否为0，为0返回 true。        | [ -z $a ] 返回 false。   |
+| -n     | 检测字符串长度是否不为 0，不为 0 返回 true。 | [ -n "$a" ] 返回 true。  |
+| $      | 检测字符串是否为空，不为空返回 true。        | [ $a ] 返回 true。       |
+
+```bash
+#!/bin/bash
+a="abc"
+b="efg"
+
+if [ $a = $b ]
+then
+   echo "$a = $b : a 等于 b"
+else
+   echo "$a = $b: a 不等于 b"
+fi
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a != $b: a 等于 b"
+fi
+if [ -z $a ]
+then
+   echo "-z $a : 字符串长度为 0"
+else
+   echo "-z $a : 字符串长度不为 0"
+fi
+if [ -n "$a" ]
+then
+   echo "-n $a : 字符串长度不为 0"
+else
+   echo "-n $a : 字符串长度为 0"
+fi
+if [ $a ]
+then
+   echo "$a : 字符串不为空"
+else
+   echo "$a : 字符串为空"
+fi
+```
+
+##### 4.6 文件测试运算符
+
+| 操作符  | 说明                                                         | 举例                      |
+| :------ | :----------------------------------------------------------- | :------------------------ |
+| -b file | 检测文件是否是块设备文件，如果是，则返回 true。              | [ -b $file ] 返回 false。 |
+| -c file | 检测文件是否是字符设备文件，如果是，则返回 true。            | [ -c $file ] 返回 false。 |
+| -d file | 检测文件是否是目录，如果是，则返回 true。                    | [ -d $file ] 返回 false。 |
+| -f file | 检测文件是否是普通文件（既不是目录，也不是设备文件），如果是，则返回 true。 | [ -f $file ] 返回 true。  |
+| -g file | 检测文件是否设置了 SGID 位，如果是，则返回 true。            | [ -g $file ] 返回 false。 |
+| -k file | 检测文件是否设置了粘着位(Sticky Bit)，如果是，则返回 true。  | [ -k $file ] 返回 false。 |
+| -p file | 检测文件是否是有名管道，如果是，则返回 true。                | [ -p $file ] 返回 false。 |
+| -u file | 检测文件是否设置了 SUID 位，如果是，则返回 true。            | [ -u $file ] 返回 false。 |
+| -r file | 检测文件是否可读，如果是，则返回 true。                      | [ -r $file ] 返回 true。  |
+| -w file | 检测文件是否可写，如果是，则返回 true。                      | [ -w $file ] 返回 true。  |
+| -x file | 检测文件是否可执行，如果是，则返回 true。                    | [ -x $file ] 返回 true。  |
+| -s file | 检测文件是否为空（文件大小是否大于0），不为空返回 true。     | [ -s $file ] 返回 true。  |
+| -e file | 检测文件（包括目录）是否存在，如果是，则返回 true。          | [ -e $file ] 返回 true。  |
+
+```sh
+#!/bin/bash
+
+file="/var/www/runoob/test.sh"
+if [ -r $file ]
+then
+   echo "文件可读"
+else
+   echo "文件不可读"
+fi
+if [ -w $file ]
+then
+   echo "文件可写"
+else
+   echo "文件不可写"
+fi
+if [ -x $file ]
+then
+   echo "文件可执行"
+else
+   echo "文件不可执行"
+fi
+if [ -f $file ]
+then
+   echo "文件为普通文件"
+else
+   echo "文件为特殊文件"
+fi
+if [ -d $file ]
+then
+   echo "文件是个目录"
+else
+   echo "文件不是个目录"
+fi
+if [ -s $file ]
+then
+   echo "文件不为空"
+else
+   echo "文件为空"
+fi
+if [ -e $file ]
+then
+   echo "文件存在"
+else
+   echo "文件不存在"
+fi
+```
+
+### 5. echo命令
+
+shell中的echo命令和php中的echo命令类似，常用的用法就不介绍了，这些写一些有意思的用法
+
+```bash
+#!/bin/sh
+#read命令：是从标准输入中读取一行，并把
+read name 
+echo "$name It is a test"
+```
+
+### 6. printf命令
+
+printf 命令模仿 C 程序库（library）里的 printf() 程序。
+
+printf 由 POSIX 标准所定义，因此使用 printf 的脚本比使用 echo 移植性好。
+
+printf 使用引用文本或空格分隔的参数，外面可以在 printf 中使用格式化字符串，还可以制定字符串的宽度、左右对齐方式等。默认 printf 不会像 echo 自动添加换行符，我们可以手动添加 \n。
+
+printf 命令的语法：
+
+```bash
+printf  format-string  [arguments...]
+```
+
+格式说明：
+
+- Format-string: 为格式控制字符串
+- Arguments: 为参数列表
+
+接下来显示printf的一些强大功能
+
+```bash
+printf "%-10s %-8s %-4s\n" 姓名 性别 体重kg  
+printf "%-10s %-8s %-4.2f\n" 郭靖 男 66.1234 
+printf "%-10s %-8s %-4.2f\n" 杨过 男 48.6543 
+printf "%-10s %-8s %-4.2f\n" 郭芙 女 47.9876 
+```
+
+显示结果：
+
+```bash
+姓名     性别   体重kg
+郭靖     男      66.12
+杨过     男      48.65
+郭芙     女      47.99
+```
+
+%s %c %d %f都是格式替代符
+
+%-10s 指一个宽度为10个字符（-表示左对齐，没有则表示右对齐），任何字符都会被显示在10个字符宽的字符内，如果不足则自动以空格填充，超过也会将内容全部显示出来。
+
+%-4.2f 指格式化为小数，其中.2指保留2位小数。
+
+### 7. 流程控制
+
+在shell中的流程控制不能为空，如在shell中的if else，如果else中没有需要执行的语句，就不要写这个else
+
+##### 7.1 if...else...
+
+语法：
+
+```bash
+#第一种，只有if的情况
+if condition
+then
+    command1 
+    command2
+    ...
+    commandN 
+fi
+#第二种：if else
+if condition
+then
+    command1 
+    command2
+    ...
+    commandN 
+else
+		command
+fi
+#第三种： if else-if else
+if condition1
+then
+    command1
+elif condition2 
+then 
+    command2
+else
+    commandN
+fi
+```
+
+##### 7.2 for循环
+
+for一般格式：
+
+```bash
+for var in item1 item2 ... itemN
+do
+    command1
+    command2
+    ...
+    commandN
+done
+```
+
+也可以使用类C的格式
+
+```bash
+#注意！需要加两个括号
+for ((a=1; a<11; a++))
+do
+  echo $[a+100]
+done
+```
+
+##### 7.3 while 语句
+
+语法：
+
+```bash
+while condition
+do
+    command
+done
+```
+
+例子：
+
+```bash
+#!/bin/bash
+int=1
+while(( $int<=5 ))
+do
+    echo $int
+    let "int++"
+done
+```
+
+以上实例使用了 Bash let 命令，它用于执行一个或多个表达式，变量计算中不需要加上 $ 来表示变量
+
+while循环可用于读取键盘信息。下面的例子中，输入信息被设置为变量FILM，按<Ctrl-D>结束循环。
+
+```bash
+echo '按下 <CTRL-D> 退出'
+echo -n '输入你最喜欢的网站名: '
+while read FILM
+do
+    echo "是的！$FILM 是一个好网站"
+done
+```
 
