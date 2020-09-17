@@ -390,3 +390,86 @@ vim有三种模式：
   ```
 
 - `unmount`：卸载目录，常用的选项`-f`强制卸载
+
+### 4. 日常使用命令学习
+
+##### 4.1 awk命令
+
+AWK 是一种处理文本文件的语言，是一个强大的文本分析工具。
+
+**它依次处理文件的每一行，并读取里面的每一个字段**。对于日志、CSV 那样的每行格式相同的文本文件，`awk`可能是最方便的工具。
+
+命令格式：
+
+```bash
+#格式
+awk 动作 文件名
+
+#示例
+awk '{print $0}' demo.txt
+```
+
+`'{xxx}'`是需要处理每一行数据的格式，其中的`xxx`就是每一行执行的动作，`print $0`就是打印每一行的所有数据，`$0`表示所有数据，
+
+`awk`会根据**空格**和制表符，将每一行分成若干字段，依次用`$1`、`$2`、`$3`代表第一个字段、第二个字段、第三个字段等等。当然，也可以使用其他的符号作为分隔符，需要通过`-F`参数来设置分隔符。
+
+示例：
+
+```bash
+#以冒号作为分隔符，并打印每一行第一字段的信息
+$ awk -F ':' '{ print $1 }' demo.txt
+root
+daemon
+bin
+sys
+sync
+```
+
+**awk脚本**:
+
+awk脚本需要注意两个关键字`BEGIN`和`END`
+
+- BEGIN{ 这里面放的是执行前的语句 }，一般设置一些初始值或者提示信息等
+- {这里面放的是处理每一行时要执行的语句} 
+- END {这里面放的是处理完所有的行后要执行的语句 }
+
+举一个实际的例子更好理解：
+
+```bash
+# 一个log1.log的文件中有
+wapi.lanehub.cn /api/user/get_user_detail
+wapi.lanehub.cn /api/dict/ability/relationship
+wapi.lanehub.cn /api/dict/ability/get_ability_config
+wapi.lanehub.cn /api/enterprise/home_page/get_ability
+wapi.lanehub.cn /api/user/get_user_detail
+wapi.lanehub.cn /api/user/get_user_detail
+wapi.lanehub.cn /api/enterprise/home_page/get_ability
+wapi.lanehub.cn /api/user/get_user_detail
+wapi.lanehub.cn /api/dict/ability/get_ability_config
+wapi.lanehub.cn /api/dict/ability/relationship
+```
+
+现在我们来统计每一行出现的次数
+
+```bash
+cat log1.log|awk '{count[$1$2]++}END{for(i in count) print i,count[i]}'
+```
+
+统计出来的结果：
+
+```bash
+wapi.lanehub.cn/api/user/get_user_detail 4
+wapi.lanehub.cn/api/dict/ability/get_ability_config 2
+wapi.lanehub.cn/api/dict/ability/relationship 2
+wapi.lanehub.cn/api/enterprise/home_page/get_ability 2
+```
+
+命令的意思：
+
+{}`就是处理每一行时需要执行的语句，在这个里面定义了一个count数组，其key是$1拼接$2，出现一次重复，数量加1
+
+`END{}`就是执行完成需要执行的语句，在这里写了一个for循环，用来输出每一个key的数量
+
+##### 4.2 scp命令
+
+##### 4.3 grep命令
