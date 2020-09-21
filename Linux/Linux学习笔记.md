@@ -472,4 +472,92 @@ wapi.lanehub.cn/api/enterprise/home_page/get_ability 2
 
 ##### 4.2 scp命令
 
+Linux scp 命令用于 Linux 之间复制文件和目录。
+
+scp 是 secure copy 的缩写, scp 是 linux 系统下基于 ssh 登陆进行安全的远程文件拷贝命令。
+
+scp 是加密的，[rcp](https://www.runoob.com/linux/linux-comm-rcp.html) 是不加密的，scp 是 rcp 的加强版。
+
+**语法：**
+
+```bash
+scp [-1246BCpqrv] [-c cipher] [-F ssh_config] [-i identity_file]
+[-l limit] [-o ssh_option] [-P port] [-S program]
+[[user@]host1:]file1 [...] [[user@]host2:]file2
+```
+
+**简易写法:**
+
+```bash
+sc [可选参数] 文件来源 文件目标
+```
+
+**常用的参数：**
+
+- -C 允许压缩
+- -p 保留原文件的修改时间，访问时间和访问权限
+- -r 递归复制整个目录
+- -P port：注意是大写的P, port是指定数据传输用到的端口号
+
+示例：
+
+```bash
+#复制本地文件到远程
+scp local_file remote_username@remote_ip:remote_folder
+或者
+scp local_file remote_username@remote_ip:remote_file 
+或者 
+scp local_file remote_ip:remote_folder 
+或者 
+scp local_file remote_ip:remote_file 
+
+#复制目录
+scp -r local_folder remote_username@remote_ip:remote_folder 
+或者 
+scp -r local_folder remote_ip:remote_folder 
+
+#复制远程文件到本地，只要将从本地复制到远程的命令的后2个参数调换顺序即可
+```
+
+
+
 ##### 4.3 grep命令
+
+grep 命令用于查找文件李符合条件的字符串,如果发现某文件的内容符合所指定的范本样式，预设 grep 指令会把含有范本样式的那一列显示出来
+
+**语法：**
+
+```bash
+grep [-abcEFGhHilLnqrsvVwxy][-A<显示列数>][-B<显示列数>][-C<显示列数>][-d<进行动作>][-e<范本样式>][-f<范本文件>][--help][范本样式][文件或目录...]
+```
+
+**常用的参数：**
+
+- **-A<显示行数> 或 --after-context=<显示行数>** : 除了显示符合范本样式的那一列之外，并显示该行之后的内容。
+- **-B<显示行数> 或 --before-context=<显示行数>** : 除了显示符合样式的那一行之外，并显示该行之前的内容。
+- **-c 或 --count** : 计算符合样式的列数。
+- **-C<显示行数> 或 --context=<显示行数>或-<显示行数>** : 除了显示符合样式的那一行之外，并显示该行前后若干行的内容。
+- **-f<规则文件> 或 --file=<规则文件>** : 指定规则文件，其内容含有一个或多个规则样式，让grep查找符合规则条件的文件内容，格式为每行一个规则样式。
+- **-i 或 --ignore-case** : 忽略字符大小写的差别。
+- **-l 或 --file-with-matches** : 列出文件内容符合指定的样式的文件名称。
+- **-L 或 --files-without-match** : 列出文件内容不符合指定的样式的文件名称。
+- **-v 或 --invert-match** : 显示不包含匹配文本的所有行。
+
+**示例：**
+
+```bash
+#grep 可以使用通配符
+grep test *file 
+#已递归的方式查找符合条件的文件
+grep -r update /etc/acpi 
+#方向查找，前面各个例子是查找并打印出符合条件的行
+grep -v test *test*
+#查找后面文件的所有行且不在前面文件中的行，行数过多会返回不正确
+grep -v -f shao.txt duo.txt
+```
+
+
+
+##### 4.4 文件取交集，并集，差集
+
+https://www.jianshu.com/p/ca19d072a8be
