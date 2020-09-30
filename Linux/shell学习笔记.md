@@ -563,3 +563,169 @@ do
 done
 ```
 
+##### 7.4 case
+
+case的用法和php的switch...case相同, 在php中使用else捕获其他，在shell中使用`*`捕获其他
+
+语法：
+
+```bash
+case 值 in
+模式1)
+    command1
+    command2
+    ...
+    commandN
+    ;;
+模式2）
+    command1
+    command2
+    ...
+    commandN
+    ;;
+esac
+```
+
+示例：
+
+```bash
+echo '输入 1 到 4 之间的数字:'
+echo '你输入的数字为:'
+read aNum
+case $aNum in
+    1)  echo '你选择了 1'
+    ;;
+    2)  echo '你选择了 2'
+    ;;
+    3)  echo '你选择了 3'
+    ;;
+    4)  echo '你选择了 4'
+    ;;
+    *)  echo '你没有输入 1 到 4 之间的数字'
+    ;;
+esac
+```
+
+##### 7.5 跳出循环
+
+Break、continue 和php中用法相同
+
+### 8. 函数
+
+说明：
+
+- 1、可以带function fun() 定义，也可以直接fun() 定义,不带任何参数。
+- 2、参数返回，可以显示加：return 返回，如果不加，将以最后一条命令运行结果，作为返回值。 return后跟数值
+
+示例：
+
+```bash
+#/bin/zsh
+test(){
+		echo '第一个shell函数';
+}
+test
+```
+
+下面定义一个带返回的函数：
+
+```bash
+funWithReturn(){
+    echo "这个函数会对输入的两个数字进行相加运算..."
+    echo "输入第一个数字: "
+    read aNum
+    echo "输入第二个数字: "
+    read anotherNum
+    echo "两个数字分别为 $aNum 和 $anotherNum !"
+    return $(($aNum+$anotherNum))
+}
+funWithReturn
+echo "输入的两个数字之和为 $? !"
+```
+
+函数的返回值通过`$?`获取
+
+**函数传参:**
+
+在shell中，向函数内传入参数是在函数后跟参数，以空格分隔，在函数内接受参数使用$1,$2,$3.... **需要注意的是，从第十个参数开始，需要用`${10},${11}..`来表示参数**
+
+示例：
+
+```bash
+funWithParam(){
+    echo "第一个参数为 $1 !"
+    echo "第二个参数为 $2 !"
+    #输出的10
+    echo "第十个参数为 $10 !"
+    echo "第十个参数为 ${10} !"
+    echo "第十一个参数为 ${11} !"
+    echo "参数总数有 $# 个!"
+    echo "作为一个字符串输出所有参数 $* !"
+}
+funWithParam 1 2 3 4 5 6 7 8 9 34 73
+```
+
+还有几个特殊字符用来处理参数：
+
+| 参数处理 | 说明                                                         |
+| :------- | :----------------------------------------------------------- |
+| $#       | 传递到脚本或函数的参数个数                                   |
+| $*       | 以一个单字符串显示所有向脚本传递的参数                       |
+| $$       | 脚本运行的当前进程ID号                                       |
+| $!       | 后台运行的最后一个进程的ID号                                 |
+| $@       | 与$*相同，但是使用时加引号，并在引号中返回每个参数。         |
+| $-       | 显示Shell使用的当前选项，与set命令功能相同。                 |
+| $?       | 显示最后命令的退出状态。0表示没有错误，其他任何值表明有错误。 |
+
+### 9. 文件包含
+
+包含文件的语法如下：
+
+```bash
+. filename   # 注意点号(.)和文件名中间有一空格
+
+或
+
+source filename
+```
+
+### 实例
+
+创建两个 shell 脚本文件。
+
+test1.sh 代码如下：
+
+```
+#!/bin/bash
+# author:菜鸟教程
+# url:www.runoob.com
+
+url="http://www.runoob.com"
+```
+
+test2.sh 代码如下：
+
+```
+#!/bin/bash
+# author:菜鸟教程
+# url:www.runoob.com
+
+#使用 . 号来引用test1.sh 文件
+. ./test1.sh
+
+# 或者使用以下包含文件代码
+# source ./test1.sh
+
+echo "菜鸟教程官网地址：$url"
+```
+
+接下来，我们为 test2.sh 添加可执行权限并执行：
+
+```
+$ chmod +x test2.sh 
+$ ./test2.sh 
+菜鸟教程官网地址：http://www.runoob.com
+```
+
+> *被包含的文件 test1.sh 不需要可执行权限。*
+

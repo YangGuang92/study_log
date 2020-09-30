@@ -23,6 +23,8 @@
 
 ### 2.ES安装
 
+##### 2.1 docker_compose 安装(有点问题)
+
 ```yml
 version: "3.1"
 services:
@@ -45,6 +47,62 @@ services:
 ```
 
 ES安装完成之后，记得安装ik分词器，**且必须与ES版本相同**，且安装成功成功后需要重启
+
+##### 2.1 linux安装
+
+1. 下载。官网下载速度太慢，可以使用华为镜像：https://mirrors.huaweicloud.com/elasticsearch/
+
+   ```bash
+   #我下的是7.7.0版本的
+   wget https://mirrors.huaweicloud.com/elasticsearch/7.7.0/elasticsearch-7.7.0-linux-x86_64.tar.gz
+   #解压
+   tar -xzvf elasticsearch-7.7.0-linux-x86_64.tar.gz
+   ```
+
+2. 可能遇到的问题
+
+   - 内存不够的问题、不能用root启动的问题、外网不能访问的问题：https://juejin.im/post/6844903694287241229#heading-11
+   - 当`network_host`设置为0.0.0.0后，会提示最大虚拟内存不足、默认设置不能用于生产的错误：https://blog.csdn.net/qq_37205890/article/details/103928078
+
+3. 在浏览器中访问 http://ip:9200，出现如下图所示，表示安装成功
+
+   ```json
+   {
+     "name": "iZbp1a01zic0bgbib738aaZ",
+     "cluster_name": "elasticsearch",
+     "cluster_uuid": "HGLidF50Qo6ZKI_nzloPNw",
+     "version": {
+       "number": "7.7.0",
+       "build_flavor": "default",
+       "build_type": "tar",
+       "build_hash": "81a1e9eda8e6183f5237786246f6dced26a10eaf",
+       "build_date": "2020-05-12T02:01:37.602180Z",
+       "build_snapshot": false,
+       "lucene_version": "8.5.1",
+       "minimum_wire_compatibility_version": "6.8.0",
+       "minimum_index_compatibility_version": "6.0.0-beta1"
+     },
+     "tagline": "You Know, for Search"
+   }
+   ```
+
+   
+
+4. 安装chrom中的head扩展:https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm?hl=zh-CN
+
+5. 安装ik分词器，**且必须与ES版本相同**
+
+   github地址：https://github.com/medcl/elasticsearch-analysis-ik
+
+   ```bash
+   wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.7.0/elasticsearch-analysis-ik-7.7.0.zip
+   ```
+
+   在es的安装目录的`plugins/`文件夹下创建`ik`文件夹，然后把压缩文件解压到这个目录下
+
+   
+
+   
 
 ### 3. ES的基本操作
 
